@@ -1,4 +1,5 @@
-import os, subprocess
+import os
+import subprocess
 from sklearn import svm
 from joblib import dump, load
 from PIL import Image
@@ -24,6 +25,7 @@ ci_config = Config(clip_model_name=clip_model_name,
                    caption_model_name=caption_model_name)
 ci = Interrogator(ci_config)
 
+
 def image_to_prompt(image):
     """
     Takes a PIL image and returns extracted text using CLIP.
@@ -32,23 +34,36 @@ def image_to_prompt(image):
     text = ci.interrogate_fast(image)
     return text
 
+
 # -----------------------
-# TO-DO implemented: take user input and display the image
+# Take user input and display the image
 # -----------------------
 image_path = "image.png"  # Replace with your test image path
+
+if not os.path.exists(image_path):
+    print(f"Error: Image file not found: {image_path}")
+    exit()
+
 image = Image.open(image_path)
 image.show()
 
 user_input = input("Enter the text you want to search for: ")
-print(f"You entered: {user_input}")
 
+if not user_input.strip():
+    print("Error: Search text cannot be empty.")
+    exit()
+
+print(f"You entered: {user_input}")
 # -----------------------
 # New TO-DO: Find similar words using trained Word2Vec model
 # -----------------------
 # Load the trained Word2Vec model
 model_path = "word2vec_model.model"  # Replace with your actual model path
-model = Word2Vec.load(model_path)
-
+try:
+    model = Word2Vec.load(model_path)
+except FileNotFoundError:
+    print(f"Error: Model file not found: {model_path}")
+    exit()ś
 # Find most similar words
 try:
     similar_words = model.wv.most_similar(user_input, topn=10)
